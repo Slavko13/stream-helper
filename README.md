@@ -11,3 +11,6 @@
 Spring boot
 Java 17
 Swagger 2
+
+Описание api тут - http://localhost:8080/docs/swagger-ui/index.html
+
