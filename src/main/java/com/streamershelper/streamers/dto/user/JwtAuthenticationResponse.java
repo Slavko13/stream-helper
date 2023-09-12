@@ -1,4 +1,14 @@
 package com.streamershelper.streamers.dto.user;
 
-public record JwtAuthenticationResponse(String accessToken) {
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+@Data
+@AllArgsConstructor
+public class JwtAuthenticationResponse {
+
+    private String accessToken;
+    private String refreshToken;
+
 }
