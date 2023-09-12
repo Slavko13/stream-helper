@@ -39,7 +39,8 @@ public class WebConfig {
 
     @Value("${jwt.private.key}")
     RSAPrivateKey privateKey;
-    public static final String[] PUBLIC_PATHS = {"v1/api/auth/**"};
+
+    public static final String[] PUBLIC_PATHS = {"v1/api/auth/**", "/docs/**"};
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         // @formatter:off

@@ -4,6 +4,7 @@ import com.streamershelper.streamers.dto.user.*;
 import com.streamershelper.streamers.exception.UserAlreadyExistAuthenticationException;
 import com.streamershelper.streamers.model.user.User;
 import com.streamershelper.streamers.service.user.UserService;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +39,7 @@ public class AuthController {
     final AuthenticationManager authenticationManager;
 
     @PostMapping("/signin")
+    @Operation(summary = "Вход", description = "Входи не бойс")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -65,6 +67,7 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
+    @Operation(summary = "Регистрация", description = "Ну зарегестрируйся теперь")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignUpRequest signUpRequest) {
         try {
             User user = userService.registerNewUser(signUpRequest);
