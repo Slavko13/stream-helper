@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  my-app:
+    image: my-app:latest
+    ports:
+      - "8080:8080"
+    depends_on:
+      - app-db_local
+    networks:
+      - my-network-local
+
+  app-db_local:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: streamers
+      POSTGRES_USER: appuser
+      POSTGRES_PASSWORD: 12345
+    volumes:
+      - app-db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432" # прослушивание порта 5434 на хосте и перенаправление на 5432 в контейнере
+    networks:
+      - my-network-local
+
+
+volumes:
+  app-db-data:
+networks:
+  my-network-local:
