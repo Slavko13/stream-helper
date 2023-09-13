@@ -6,6 +6,7 @@ import com.streamershelper.streamers.model.user.Role;
 import com.streamershelper.streamers.model.user.User;
 import com.streamershelper.streamers.repository.user.RoleRepository;
 import com.streamershelper.streamers.repository.user.UserRepository;
+import com.streamershelper.streamers.service.base.BaseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -13,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl extends BaseService implements UserService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;

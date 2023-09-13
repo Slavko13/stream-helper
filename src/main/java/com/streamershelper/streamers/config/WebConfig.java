@@ -40,14 +40,15 @@ public class WebConfig {
     @Value("${jwt.private.key}")
     RSAPrivateKey privateKey;
 
-    public static final String[] PUBLIC_PATHS = {"v1/api/auth/**", "/docs/**"};
+    public static final String[] PUBLIC_PATHS = {"v1/api/auth/**", "/docs/**", "v1/api/device"};
+    public static final String[] ADMIN_PATHS = {"v1/api/admin/**",};
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         // @formatter:off
         http
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers(PUBLIC_PATHS).permitAll()
-                        .anyRequest().hasAuthority("SCOPE_ROLE_ADMIN"))
+                        .anyRequest().permitAll())
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .oauth2ResourceServer((server) -> server.jwt(jwtConfigurer -> jwtConfigurer.decoder(jwtDecoder()) ))
