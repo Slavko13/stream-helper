@@ -1,6 +1,6 @@
 package com.streamershelper.streamers.service.rapid.api;
 
-import com.streamershelper.streamers.dto.pc.device.CpuDTO;
+import com.streamershelper.streamers.dto.pc.device.CpuDto;
 import com.streamershelper.streamers.service.pc.device.CpuService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,7 +36,7 @@ public class CpuDataFetcher {
     public void fetchData() {
         int page = 1;
         while (true) {
-            ResponseEntity<CpuDTO[]> response = null;
+            ResponseEntity<CpuDto[]> response = null;
             try {
                 response = makeRequest(page);
             } catch (HttpStatusCodeException ex) {
@@ -54,7 +54,7 @@ public class CpuDataFetcher {
             }
 
             if (response != null && response.getStatusCode() == HttpStatus.OK) {
-                CpuDTO[] cpus = response.getBody();
+                CpuDto[] cpus = response.getBody();
                 if (cpus.length == 0) break;
 
                 cpuService.saveAllCpu(List.of(cpus));
@@ -63,7 +63,7 @@ public class CpuDataFetcher {
         }
     }
 
-    private ResponseEntity<CpuDTO[]> makeRequest(int page) {
+    private ResponseEntity<CpuDto[]> makeRequest(int page) {
         HttpHeaders headers;
         headers = new HttpHeaders();
         headers.set("X-RapidAPI-Key", xRapidKey);
@@ -71,7 +71,7 @@ public class CpuDataFetcher {
         HttpEntity<String> entity = new HttpEntity<>(headers);
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(xRapidCpuUrl)
                 .queryParam("page", page);
-        return restTemplate.exchange(builder.toUriString(), HttpMethod.GET, entity, CpuDTO[].class);
+        return restTemplate.exchange(builder.toUriString(), HttpMethod.GET, entity, CpuDto[].class);
     }
 }
 

@@ -1,6 +1,6 @@
 package com.streamershelper.streamers.controller.pc.device;
 
-import com.streamershelper.streamers.dto.pc.device.CpuDTO;
+import com.streamershelper.streamers.dto.pc.device.CpuDto;
 import com.streamershelper.streamers.service.pc.device.CpuService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,8 +19,8 @@ public class DeviceController
 
     private final CpuService cpuService;
     @GetMapping("/cpu/get-all")
-    public ResponseEntity<List<CpuDTO>> getAllCpus() {
-        List<CpuDTO> cpus = cpuService.getAllCpu();
+    public ResponseEntity<List<CpuDto>> getAllCpus() {
+        List<CpuDto> cpus = cpuService.getAllCpu();
         return ResponseEntity.ok(cpus);
     }
 

@@ -1,7 +1,9 @@
 package com.streamershelper.streamers.service.user;
 
 import com.streamershelper.streamers.dto.user.SignUpRequest;
+import com.streamershelper.streamers.dto.user.UserDto;
 import com.streamershelper.streamers.exception.UserAlreadyExistAuthenticationException;
+import com.streamershelper.streamers.exception.http.NotFoundException;
 import com.streamershelper.streamers.model.user.Role;
 import com.streamershelper.streamers.model.user.User;
 import com.streamershelper.streamers.repository.user.RoleRepository;
@@ -32,19 +34,41 @@ public class UserServiceImpl extends BaseService implements UserService {
         if (userRepository.existsByEmailIgnoreCase(signUpRequest.getEmail())) {
             throw new UserAlreadyExistAuthenticationException("User with email id " + signUpRequest.getEmail() + " already exist");
         }
-        User user = buildUser(signUpRequest);
+        User user = map(signUpRequest, User.class);
+        user.addRole(roleRepository.findByName(Role.ROLE_USER));
+        user.setEnabled(true);
+        user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
         user = userRepository.save(user);
         userRepository.flush();
         return user;
     }
 
-    private User buildUser(final SignUpRequest signUpRequest) {
-        User user = new User();
-        user.setDisplayName(signUpRequest.getDisplayName());
-        user.setEmail(signUpRequest.getEmail());
-        user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
+
+    @Override
+    @Transactional(value = "transactionManager")
+    public UserDto registerNewUserByGoogle(final UserDto userDto) throws UserAlreadyExistAuthenticationException
+    {
+        User user = map(userDto, User.class);
         user.addRole(roleRepository.findByName(Role.ROLE_USER));
         user.setEnabled(true);
+        userRepository.save(user);
+        return map(getUserByEmail(userDto.getEmail()), UserDto.class);
+    }
+
+    @Override
+    @Transactional(value = "transactionManager")
+    public UserDto getUserInfoByEmail(final String email)
+    {
+        if (!userRepository.existsByEmailIgnoreCase(email)) {
+            throw new NotFoundException("User not found");
+        }
+        UserDto user = map(getUserByEmail(email), UserDto.class);
         return user;
     }
+
+    private User getUserByEmail(final  String email) {
+        return userRepository.findByEmailIgnoreCase(email);
+    }
+
 }
+

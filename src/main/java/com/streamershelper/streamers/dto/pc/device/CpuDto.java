@@ -5,7 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
-public class CpuDTO {
+public class CpuDto
+{
 
     @JsonProperty("CPU_Mark")
     private Integer CPUMark;

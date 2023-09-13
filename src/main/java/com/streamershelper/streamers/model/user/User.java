@@ -44,6 +44,10 @@ public class User extends BaseEntity
     @Column(name = "USING_2FA")
     private boolean using2FA;
 
+    @Column(name = "google_registration")
+    private boolean google_registration = false;
+
+
     private String secret;
 
     @JsonManagedReference

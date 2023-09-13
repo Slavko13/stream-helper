@@ -1,7 +1,12 @@
 package com.streamershelper.streamers.controller;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
 import com.streamershelper.streamers.dto.user.*;
 import com.streamershelper.streamers.exception.UserAlreadyExistAuthenticationException;
+import com.streamershelper.streamers.model.user.GoogleToken;
 import com.streamershelper.streamers.model.user.User;
 import com.streamershelper.streamers.service.user.JwtService;
 import com.streamershelper.streamers.service.user.UserService;
@@ -20,6 +25,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Map;
 
 @Slf4j
@@ -46,10 +53,7 @@ public class AuthController {
     @PostMapping("/signin")
     @Operation(summary = "Вход", description = "Входи не бойс")
     public ResponseEntity<JwtAuthenticationResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        LocalUser localUser = (LocalUser) authentication.getPrincipal();
-        return ResponseEntity.ok(jwtGeneratorService.generateTokenResponse(localUser));
+        return ResponseEntity.ok(signinUser(loginRequest.getEmail(), loginRequest.getPassword()));
     }
 
 
@@ -64,4 +68,64 @@ public class AuthController {
         }
         return ResponseEntity.ok().body(new ApiResponse(true, "User registered successfully"));
     }
+
+
+    @PostMapping("/google")
+    public ResponseEntity<?> authenticateWithGoogle(@RequestBody GoogleToken googleToken) {
+        String idToken = googleToken.getIdToken();
+
+        // Теперь используйте ваш метод верификации для проверки токена
+        UserDto userInfo = verifyToken(idToken);
+
+        if (userInfo != null) {
+            UserDto user = userService.getUserInfoByEmail(userInfo.getEmail());
+            if (user != null) {
+                return ResponseEntity.ok(signinUser(user.getEmail(),"" ));
+            } else {
+                userService.registerNewUserByGoogle(userInfo);
+                return ResponseEntity.ok().body("User registered successfully");
+            }
+        } else {
+            return ResponseEntity.badRequest().body("Invalid Google authentication token");
+        }
+    }
+
+
+
+    private UserDto verifyToken(String idTokenString) {
+        UserDto userInfo = null;
+
+        try {
+            // Подготовка верификатора токена
+            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new JacksonFactory())
+                    .setAudience(Collections.singletonList("YOUR_CLIENT_ID"))
+                    .build();
+
+            // Проверка токена
+            GoogleIdToken idToken = verifier.verify(idTokenString);
+            if (idToken != null) {
+                GoogleIdToken.Payload payload = idToken.getPayload();
+
+                String userId = payload.getSubject();
+                String email = payload.getEmail();
+                String name = (String) payload.get("name");
+                String familyName = (String) payload.get("family_name");
+                String givenName = (String) payload.get("given_name");
+                userInfo = new UserDto(email, name, true, true);
+            }
+        } catch (Exception e) {
+            // Обработка исключений
+            e.printStackTrace();
+        }
+
+        return userInfo;
+    }
+
+    private JwtAuthenticationResponse signinUser(final String email, final String password) {
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        LocalUser localUser = (LocalUser) authentication.getPrincipal();
+        return jwtGeneratorService.generateTokenResponse(localUser);
+    }
+
 }
