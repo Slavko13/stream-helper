@@ -6,6 +6,8 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import com.streamershelper.streamers.config.jwt.JWTAuthenticationFilter;
+import com.streamershelper.streamers.config.jwt.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,8 +15,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.DelegatingPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,9 +22,9 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
-import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
-import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
+
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
@@ -45,18 +45,24 @@ public class WebConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         // @formatter:off
+        JwtTokenProvider jwtTokenProvider = new JwtTokenProvider();
+        JWTAuthenticationFilter jwtAuthenticationFilter = new JWTAuthenticationFilter(jwtTokenProvider);
+        http.addFilterBefore(jwtAuthenticationFilter, BasicAuthenticationFilter.class);
+
+
         http
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers(PUBLIC_PATHS).permitAll()
-                        .anyRequest().permitAll())
+                        .requestMatchers(ADMIN_PATHS).hasRole("ADMIN")
+                        .anyRequest().authenticated())
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
-                .oauth2ResourceServer((server) -> server.jwt(jwtConfigurer -> jwtConfigurer.decoder(jwtDecoder()) ))
-                .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling((exceptions) -> exceptions
-                        .authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint())
-                        .accessDeniedHandler(new BearerTokenAccessDeniedHandler())
-                );
+                // .oauth2ResourceServer((server) -> server.jwt(jwtConfigurer -> jwtConfigurer.decoder(jwtDecoder()) ))
+                // .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // .exceptionHandling((exceptions) -> exceptions
+                //         .authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint())
+                //         .accessDeniedHandler(new BearerTokenAccessDeniedHandler())
+                 ;
         // @formatter:on
         return http.build();
     }
