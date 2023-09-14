@@ -4,6 +4,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.streamershelper.streamers.config.jwt.JwtTokenProvider;
 import com.streamershelper.streamers.dto.user.*;
 import com.streamershelper.streamers.exception.UserAlreadyExistAuthenticationException;
 import com.streamershelper.streamers.model.user.GoogleToken;
@@ -39,6 +40,8 @@ public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtGeneratorService;
+
+    private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@RequestBody String refreshToken) {
@@ -125,7 +128,7 @@ public class AuthController {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         LocalUser localUser = (LocalUser) authentication.getPrincipal();
-        return jwtGeneratorService.generateTokenResponse(localUser);
+        return jwtTokenProvider.generateToken(localUser);
     }
 
 }
