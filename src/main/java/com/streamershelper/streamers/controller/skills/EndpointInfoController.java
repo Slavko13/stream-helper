@@ -1,7 +1,7 @@
 package com.streamershelper.streamers.controller.skills;
 
 import com.streamershelper.streamers.dto.skills.EndpointInfo;
-import com.streamershelper.streamers.service.skills.SpringSecurityService;
+import com.streamershelper.streamers.service.skills.spring.security.SpringSecurityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
