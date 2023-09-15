@@ -1,5 +1,6 @@
 package com.streamershelper.streamers.service.pc.device;
 
+import com.streamershelper.streamers.annotations.DemoBean;
 import com.streamershelper.streamers.dto.pc.device.CpuDto;
 import com.streamershelper.streamers.model.pc.device.Cpu;
 import com.streamershelper.streamers.repository.pc.device.CpuRepository;
@@ -11,6 +12,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@DemoBean
 public class CpuServiceImpl extends BaseService implements CpuService
 {
 

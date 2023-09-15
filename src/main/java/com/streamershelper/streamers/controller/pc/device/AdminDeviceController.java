@@ -14,7 +14,7 @@ public class AdminDeviceController
 {
 
     private final CpuDataFetcher cpuDataFetcher;
-    @GetMapping("/update/cpu")
+    @GetMapping("/cpu/update")
     public ResponseEntity<?> getAllCpus() {
         cpuDataFetcher.fetchData();
         return ResponseEntity.ok("");

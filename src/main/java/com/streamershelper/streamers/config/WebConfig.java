@@ -23,6 +23,8 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 
+import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
+import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
@@ -40,7 +42,7 @@ public class WebConfig {
     @Value("${jwt.private.key}")
     RSAPrivateKey privateKey;
 
-    public static final String[] PUBLIC_PATHS = {"v1/api/auth/**", "/docs/**", "v1/api/device"};
+    public static final String[] PUBLIC_PATHS = {"v1/api/auth/**", "/docs/**", "v1/api/device", "v1/api/endpoints/**"};
     public static final String[] ADMIN_PATHS = {"v1/api/admin/**",};
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -59,10 +61,9 @@ public class WebConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 // .oauth2ResourceServer((server) -> server.jwt(jwtConfigurer -> jwtConfigurer.decoder(jwtDecoder()) ))
                 // .sessionManagement((session) -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                // .exceptionHandling((exceptions) -> exceptions
-                //         .authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint())
-                //         .accessDeniedHandler(new BearerTokenAccessDeniedHandler())
-                 ;
+                 .exceptionHandling((exceptions) -> exceptions
+                         .authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint())
+                         .accessDeniedHandler(new BearerTokenAccessDeniedHandler()));
         // @formatter:on
         return http.build();
     }
